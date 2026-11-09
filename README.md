@@ -135,6 +135,7 @@ vibe-error-doctor/
 ├── main.py            # 命令行 / 演示入口
 ├── requirements.txt   # 依赖（pydantic>=2.0.0）
 ├── .gitignore         # 忽略缓存、虚拟环境、密钥等
+├── LICENSE            # MIT 开源许可证
 └── README.md
 ```
 
@@ -144,3 +145,9 @@ vibe-error-doctor/
 
 - 如果在 Windows 旧版 `cmd` 里看到中文乱码，先执行 `chcp 65001` 切到 UTF-8，再运行 `python main.py`。
 - 想接入自己的日志：直接调用 `run_doctor(你的日志字符串)`，或只取降噪结果 `remove_noise_lines(...)`。
+
+---
+
+## 📄 License
+
+本项目采用 [MIT License](LICENSE) 开源。
