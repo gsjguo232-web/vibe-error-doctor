@@ -43,3 +43,35 @@ def extract_error_summary(log_text: str) -> tuple[str, str] | None:
         message = "(无附加说明)"
     # 返回二元组；调用方可以这样接：err_type, msg = extract_error_summary(log)
     return error_type, message
+
+
+# 本函数作用：吃进（文件路径, 出错行号, 上下各看几行），吐出带行号和箭头标记的源码片段；抓不到就吐 None
+def extract_code_context(file_path: str, line_number: int, window: int = 3) -> str | None:
+    # 整个读取过程套上"保险网"：文件不存在、路径是虚拟的、编码不对，都只返回 None，绝不让程序崩溃
+    try:
+        # open 是黑盒：作用是把磁盘上的文件变成可读对象；encoding 指定用 UTF-8 解码，防止中文注释乱码
+        with open(file_path, "r", encoding="utf-8") as file:
+            # readlines 是黑盒：把整个文件读成一个列表，每个元素是一行（行尾带着换行符）
+            all_lines = file.readlines()
+        # 算出片段的第一行；max 是黑盒：取两个数里较大的那个，保证不早于第 1 行
+        start_line = max(1, line_number - window)
+        # 算出片段的最后一行；min 是黑盒：取两个数里较小的那个，保证不超过文件总行数
+        end_line = min(len(all_lines), line_number + window)
+        # 要看的行号完全落在文件外面（比如行号是 0 或特别大），没东西可抓，返回 None
+        if start_line > end_line:
+            return None
+        # 准备一个空列表，用来装拼好行号的每一行文字
+        parts: list[str] = []
+        # 从片段第一行逐行走到最后一行
+        for current_line in range(start_line, end_line + 1):
+            # rstrip 是黑盒：作用是把行尾的换行符去掉，避免打印时多出一行空行
+            text = all_lines[current_line - 1].rstrip("\n")
+            # 是真正出错的那一行就加 "> " 箭头，其余行加两个空格，让行号列对得整整齐齐
+            mark = "> " if current_line == line_number else "  "
+            # f-string 里的 :>4 是黑盒：作用是把行号右对齐补空格到 4 位宽，数字才会竖着对齐
+            parts.append(f"{mark}{current_line:>4} | {text}")
+        # join 是黑盒：把列表里的每一行用换行符重新粘成一段文字，交出去
+        return "\n".join(parts)
+    # 任何异常都走这里：安静地返回 None，把"抓不到"交给调用方决定怎么显示
+    except Exception:
+        return None

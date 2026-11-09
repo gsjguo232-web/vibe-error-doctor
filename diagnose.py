@@ -1,7 +1,7 @@
 # 从 denoise.py 里取降噪函数，先把日志"脱水"再去分析
 from denoise import remove_noise_lines
-# 从 extract.py 里取两块"从日志捞东西"的积木
-from extract import extract_location, extract_error_summary
+# 从 extract.py 里取两块"从日志捞东西"的积木，再加上新的"源码抓拍"积木
+from extract import extract_location, extract_error_summary, extract_code_context
 # 从 models.py 里取诊断单模型，这是最终要装出来的东西
 from models import DiagnosisResult
 # 从 suggest.py 里取"错误类型 → 建议"的查号台
@@ -29,5 +29,13 @@ def build_diagnosis(log_text: str) -> DiagnosisResult | None:
     error_type, message = summary
     # 第四步：拿错误类型去查一句建议；字典里没有会给通用建议，不会报错
     suggestion = suggest_fix(error_type)
-    # 四样料齐了，一起塞进诊断单模型，这就是本函数的最终产物
-    return DiagnosisResult(location=location, error_type=error_type, message=message, suggestion=suggestion)
+    # 第五步：拿定位里的文件路径和行号，去本地磁盘抓取出错行前后的真实源码；抓不到也没关系，会是 None
+    code_context = extract_code_context(location.file, location.line)
+    # 五样料齐了，一起塞进诊断单模型，这就是本函数的最终产物
+    return DiagnosisResult(
+        location=location,
+        error_type=error_type,
+        message=message,
+        suggestion=suggestion,
+        code_context=code_context,
+    )

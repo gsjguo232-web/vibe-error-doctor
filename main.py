@@ -1,3 +1,5 @@
+# Python 自带的标准库 traceback，能把"刚抓到的异常"变成一段和平时看到的一模一样的报错文字
+import traceback
 # 从 denoise.py 里取降噪函数，用来打印"降噪后"的精简堆栈
 from denoise import remove_noise_lines
 # 从 diagnose.py 里取核心诊断函数，一次拿到结构化诊断单
@@ -46,6 +48,12 @@ def run_doctor(raw_log: str) -> None:
     print(f"报错原文：{result.message}")
     # 打印大白话修复建议
     print(f"修复建议：{result.suggestion}")
+    # 如果诊断单里抓到了真实源码，就多打印一个"案发现场"模块；抓不到就安静跳过
+    if result.code_context:
+        # 一次打印粗分隔线 + 小标题 + 细分隔线，省出函数行数
+        print("=" * 60 + "\n=== 📸 3. 案发现场源码抓拍 ===\n" + "-" * 60)
+        # 把带行号和对齐箭头标记的源码片段原样打印出来
+        print(result.code_context)
 
 
 # 只有直接运行 python main.py 时，下面这段才会执行；被别的文件 import 时不会执行
@@ -77,3 +85,23 @@ KeyError: 'age'
     print(demo_log)
     # 调用诊断器，打印降噪后的精简堆栈和结构化诊断报告
     run_doctor(demo_log)
+    # 下面制造一次"真实发生在 main.py 里"的报错，专门给源码抓拍功能当活靶子
+    print("=" * 60)
+    # 打印真实报错演示的标题
+    print("【真实报错演示：这次错误真的发生在 main.py 里】")
+    # 打印一条细分隔线
+    print("-" * 60)
+    # 用 try 包住故意写错的那两行；报错是预期行为，不会被真正抛出去
+    try:
+        # 造一个只有 name、没有 age 的字典，模拟数据缺字段
+        fake_user = {"name": "小明"}
+        # 去取不存在的 age 键，Python 会当场抛出 KeyError
+        print(fake_user["age"])
+    # 接住 KeyError，让程序继续往下跑
+    except KeyError:
+        # format_exc 是黑盒：作用是把刚抓住的异常变成一整段完整的 Traceback 文字
+        real_log = traceback.format_exc()
+    # 先把这段真报错原样打印，方便待会儿和"抓拍到的源码"对照
+    print(real_log)
+    # 把真报错丢进诊断器；这次定位到的是 main.py，应该能抓到真实代码
+    run_doctor(real_log)

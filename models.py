@@ -24,3 +24,5 @@ class DiagnosisResult(BaseModel):
     message: str
     # 大白话修复建议；Field(min_length=1) 是给这个字段加的规矩：至少 1 个字，不允许空字符串
     suggestion: str = Field(min_length=1)
+    # 案发现场源码片段；str | None 表示"一段文字或者空"，= None 表示暂时没有也能用
+    code_context: str | None = None
