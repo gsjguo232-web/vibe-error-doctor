@@ -1,0 +1,17 @@
+# Python 运行后自动生成的缓存目录，不需要上传
+__pycache__/
+
+# Python 编译出的字节码文件，不需要上传
+*.pyc
+
+# 本地虚拟环境目录，体积大且因机器而异
+.venv/
+
+# 本地环境变量文件，里面可能有密钥，绝对不能上传
+.env
+
+# JetBrains PyCharm 的项目配置目录
+.idea/
+
+# VS Code 的项目配置目录
+.vscode/
