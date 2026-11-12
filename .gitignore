@@ -15,3 +15,6 @@ __pycache__/
 
 # VS Code 的项目配置目录
 .vscode/
+
+# Claude 的本地工具配置，不需要上传
+.claude/
